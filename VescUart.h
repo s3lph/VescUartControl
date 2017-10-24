@@ -60,7 +60,7 @@ If you want to use debug, uncomment DEBUGSERIAL and define a port.*/
 //#endif
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
+#include "Arduino.h"
 #else
 #include "WProgram.h"
 #endif
@@ -95,7 +95,7 @@ int ReceiveUartMessage(uint8_t* payloadReceived, int num);
 ///#define DEBUG necessary
 ///Define in a Config.h the DEBUGSERIAL you want to use
 
-void SerialPrint(const struct bldcMeasure& values);
+void SerialPrint(const mc_values& values);
 
 ///Help Function to print uint8_t array over Serial for Debug
 ///Define in a Config.h the DEBUGSERIAL you want to use
@@ -103,12 +103,12 @@ void SerialPrint(const struct bldcMeasure& values);
 void SerialPrint(uint8_t* data, int len);
 
 ///Sends a command to VESC and stores the returned data
-///@param bldcMeasure struct with received data
+///@param values struct with received data
 ///@param num as integer with the serial port in use (0=Serial; 1=Serial1; 2=Serial2; 3=Serial3;)
 ///num must not be set, when only one Serial
 //@return true if success
-bool VescUartGetValue(struct bldcMeasure& values, int num);
-bool VescUartGetValue(bldcMeasure& values);
+bool VescUartGetValues(struct mc_values& values, int num);
+bool VescUartGetValues(struct mc_values& values);
 
 ///Sends a command to VESC to control the motor current
 ///@param current as float with the current for the motor

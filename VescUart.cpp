@@ -53,8 +53,8 @@ int ReceiveUartMessage(uint8_t* payloadReceived, int num) {
 	//Messages <= 255 start with 2. 2nd byte is length
 	//Messages >255 start with 3. 2nd and 3rd byte is length combined with 1st >>8 and then &0xFF
 
-	int counter = 0;
-	int endMessage = 256;
+	unsigned int counter = 0;
+	size_t endMessage = 256;
 	bool messageRead = false;
 	uint8_t messageReceived[256];
 	int lenPayload = 0;
@@ -185,7 +185,7 @@ int PackSendPayload(uint8_t* payload, int lenPay, int num) {
 	messageSend[count++] = (uint8_t)(crcPayload >> 8);
 	messageSend[count++] = (uint8_t)(crcPayload & 0xFF);
 	messageSend[count++] = 3;
-	messageSend[count] = NULL;
+	messageSend[count] = '\0';
 
 if(debugSerialPort!=NULL){
 	debugSerialPort->print("UART package send: "); SerialPrint(messageSend, count);
@@ -220,8 +220,7 @@ if(debugSerialPort!=NULL){
 	return count;
 }
 
-
-bool ProcessReadPacket(uint8_t* message, struct bldcMeasure& values, int len) {
+bool ProcessReadPacket(uint8_t* message, mc_values& values, int len) {
 	COMM_PACKET_ID packetId;
 	int32_t ind = 0;
 
@@ -233,24 +232,26 @@ bool ProcessReadPacket(uint8_t* message, struct bldcMeasure& values, int len) {
 	{
 
 	case COMM_GET_VALUES:
-		values.tempFetFiltered		= buffer_get_float16(message, 1e1, &ind);
-		values.tempMotorFiltered	= buffer_get_float16(message, 1e1, &ind);
-		values.avgMotorCurrent		= buffer_get_float32(message, 100.0, &ind);
-		values.avgInputCurrent		= buffer_get_float32(message, 100.0, &ind);
-		values.avgId				= buffer_get_float32(message, 1e2, &ind);
-		values.avgIq				= buffer_get_float32(message, 1e2, &ind);
-		values.dutyNow				= buffer_get_float16(message, 1000.0, &ind);
-		values.rpm					= buffer_get_float32(message, 1.0, &ind);
-		values.inpVoltage			= buffer_get_float16(message, 10.0, &ind);
-		values.ampHours				= buffer_get_float32(message, 10000.0, &ind);
-		values.ampHoursCharged		= buffer_get_float32(message, 10000.0, &ind);
-		values.wattHours			= buffer_get_float32(message, 1e4, &ind);
-		values.watthoursCharged		= buffer_get_float32(message, 1e4, &ind);
-		values.tachometer			= buffer_get_int32(message, &ind);
-		values.tachometerAbs		= buffer_get_int32(message, &ind);
-		values.faultCode			= message[ind];
+                values.temp_mos1 = buffer_get_float16(message, 10.0, &ind);
+                values.temp_mos2 = buffer_get_float16(message, 10.0, &ind);
+                values.temp_mos3 = buffer_get_float16(message, 10.0, &ind);
+                values.temp_mos4 = buffer_get_float16(message, 10.0, &ind);
+                values.temp_mos5 = buffer_get_float16(message, 10.0, &ind);
+                values.temp_mos6 = buffer_get_float16(message, 10.0, &ind);
+                values.temp_pcb = buffer_get_float16(message, 10.0, &ind);
+                values.current_motor = buffer_get_float32(message, 100.0, &ind);
+                values.current_in = buffer_get_float32(message, 100.0, &ind);
+                values.duty_now = buffer_get_float16(message, 1000.0, &ind);
+                values.rpm = buffer_get_float32(message, 1.0, &ind);
+                values.v_in = buffer_get_float16(message, 10.0, &ind);
+                values.amp_hours = buffer_get_float32(message, 10000.0, &ind);
+                values.amp_hours_charged = buffer_get_float32(message, 10000.0, &ind);
+                values.watt_hours = buffer_get_float32(message, 10000.0, &ind);
+                values.watt_hours_charged = buffer_get_float32(message, 10000.0, &ind);
+                values.tachometer = buffer_get_int32(message, &ind);
+                values.tachometer_abs = buffer_get_int32(message, &ind);
+                values.fault_code = (mc_fault_code)message[ind++];
 		return true;
-		break;
 	default:
 		return false;
 		break;
@@ -258,14 +259,14 @@ bool ProcessReadPacket(uint8_t* message, struct bldcMeasure& values, int len) {
 
 }
 
-bool VescUartGetValue(bldcMeasure& values, int num) {
+bool VescUartGetValues(struct mc_values& values, int num) {
 	uint8_t command[1] = { COMM_GET_VALUES };
 	uint8_t payload[256];
 	PackSendPayload(command, 1, num);
 	delay(10); //needed, otherwise data is not read
 	int lenPayload = ReceiveUartMessage(payload, num);
 	if (lenPayload > 1) {
-		bool read = ProcessReadPacket(payload, values, lenPayload); //returns true if sucessful
+		bool read = ProcessMcValues(payload, values, lenPayload); //returns true if sucessful
 		return read;
 	}
 	else
@@ -273,8 +274,9 @@ bool VescUartGetValue(bldcMeasure& values, int num) {
 		return false;
 	}
 }
-bool VescUartGetValue(bldcMeasure& values) {
-	return VescUartGetValue(values, 0);
+
+bool VescUartGetValues(struct mc_values& values, int num) {
+    VescUartGetValues(values, 0);
 }
 
 void VescUartSetCurrent(float current, int num) {
