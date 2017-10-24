@@ -259,15 +259,14 @@ bool ProcessReadPacket(uint8_t* message, mc_values& values, int len) {
 
 }
 
-bool VescUartGetValues(struct mc_values& values, int num) {
+bool VescUartGetValues(mc_values& values, int num) {
 	uint8_t command[1] = { COMM_GET_VALUES };
 	uint8_t payload[256];
 	PackSendPayload(command, 1, num);
 	delay(10); //needed, otherwise data is not read
 	int lenPayload = ReceiveUartMessage(payload, num);
 	if (lenPayload > 1) {
-		bool read = ProcessMcValues(payload, values, lenPayload); //returns true if sucessful
-		return read;
+		return ProcessReadPacket(payload, values, lenPayload); //returns true if sucessful
 	}
 	else
 	{
@@ -275,8 +274,8 @@ bool VescUartGetValues(struct mc_values& values, int num) {
 	}
 }
 
-bool VescUartGetValues(struct mc_values& values, int num) {
-    VescUartGetValues(values, 0);
+bool VescUartGetValues(mc_values& values) {
+    return VescUartGetValues(values, 0);
 }
 
 void VescUartSetCurrent(float current, int num) {

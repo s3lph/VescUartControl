@@ -499,7 +499,7 @@ typedef enum {
 	MOTE_PACKET_PROCESS_SHORT_BUFFER,
 } MOTE_PACKET;
 
-struct {
+typedef struct {
         float v_in;
         float temp_mos1;
         float temp_mos2;

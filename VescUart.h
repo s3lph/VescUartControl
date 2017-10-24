@@ -107,8 +107,8 @@ void SerialPrint(uint8_t* data, int len);
 ///@param num as integer with the serial port in use (0=Serial; 1=Serial1; 2=Serial2; 3=Serial3;)
 ///num must not be set, when only one Serial
 //@return true if success
-bool VescUartGetValues(struct mc_values& values, int num);
-bool VescUartGetValues(struct mc_values& values);
+bool VescUartGetValues(mc_values& values, int num);
+bool VescUartGetValues(mc_values& values);
 
 ///Sends a command to VESC to control the motor current
 ///@param current as float with the current for the motor
