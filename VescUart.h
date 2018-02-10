@@ -158,4 +158,7 @@ void VescUartSetDuty(float duty) ;
 void VescUartSetRPM(float rpm, int num);
 void VescUartSetRPM(float rpm);
 
+///Sends a command to VESC to cause it to reboot
+void VescUartReboot();
+
 #endif

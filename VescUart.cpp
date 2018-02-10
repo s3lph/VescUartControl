@@ -368,6 +368,10 @@ void VescUartSetNunchukValues(remotePackage& data) {
 	VescUartSetNunchukValues(data, 0);
 }
 
+void VescUartReboot() {
+  uint8_t payload = COMM_REBOOT;
+  PackSendPayload(&payload, 1, num);
+}
 
 void SerialPrint(uint8_t* data, int len) {
 
